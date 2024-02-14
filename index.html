@@ -7,16 +7,20 @@
   <title>Chat en tiempo real</title>
 
   <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
 
     html {
 
-    color-scheme: dark light;
+    display: flex;
 
-    height: 100vh;
+    justify-content: center;
 
-    display: grid;
+    align-items: center;
 
-    place-content: center;
+    flex-direction: column;
 
    }
 
@@ -36,6 +40,10 @@
 
     margin-bottom: 15px;
 
+    border-radius: 25px;
+    
+    background-color: white;
+
    }
 
     #form {
@@ -46,26 +54,17 @@
 
     max-width: 300px;
 
-    margin: auto;
-
    }
 
     #input {
 
     flex-grow: 1;
 
-    margin-right: 10px;
-
-   }
-
-    #chat-box {
-
-    border-radius: 25px;
 
    }
 
     #messages {
-
+    margin-left: 10px;
     font-size: 16px;
 
    }
@@ -76,25 +75,77 @@
 
    }
 
+   .nombre {
+    height: 100vh;
+    width: 100vw;
+    background-color: rgb(90, 164, 204);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .chat {
+    background-color: rgb(90, 164, 204);
+    height: 100vh;
+    width: 100vw;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  .error {
+    position: fixed;
+    margin-top: 100px;
+    color: red;
+    text-shadow: 2px 2px 4px #000000;
+    display: none;
+  }
+  .error2 {
+    position: fixed;
+    margin-top: 100px;
+    color: red;
+    text-shadow: 2px 2px 4px #000000;
+    display: none;
+  }
   </style>
 
  </head>
 
  <body>
+  <section class="nombre">
+    <div>
+      <form id="formNombre">
+        <label for="inputNombre">Nombre de usuario:</label>
+        <input id="inputNombre" name="inputNombre" autocomplete="off" />
+     
+        <button>ENVIAR</button>
+     
+       </form>
+    </div>
+    <h1 class="error">Introduce un nombre de usuario</h1>
+    <h1 class="error2">Sin espacios en blanco</h1>
+    
 
-  <div id="chat-box">
+  </section>
 
-   <ul id="messages"></ul>
+  <section class="chat">
 
-  </div>
+    <div id="chat-box">
 
-  <form id="form">
+      <ul id="messages"></ul>
+   
+    </div>
+   
+     <form id="form">
+   
+      <input id="input" autocomplete="off" />
+   
+      <button>ENVIAR</button>
+   
+     </form>
 
-   <input id="input" autocomplete="off" />
-
-   <button>ENVIAR</button>
-
-  </form>
+  </section>
 
   <script src="https://cdn.socket.io/4.1.2/socket.io.min.js"></script>
 
@@ -104,7 +155,55 @@
 
     $(function () {
 
-     const socket = io("https://onlinechat.zeabur.app/");
+      const socket = io("https://onlinechat.zeabur.app/");
+ 
+      $("#formNombre").submit(function (event) {
+       
+       event.preventDefault();
+      
+       const nombreUsuario = $("#inputNombre").val();
+
+       const containsWhitespace = str => /\s/.test(str);
+       let error2 = document.querySelector(".error2");
+       let error = document.querySelector(".error");
+
+       if( nombreUsuario == "" ) {
+       
+        error2.style.display = "none";
+        error.style.display = "block";
+       }
+       else if( containsWhitespace(nombreUsuario) == true){
+        console.log("hola");
+        error.style.display = "none";
+        error2.style.display = "block";
+      }
+       else {
+        localStorage.setItem("NombreUsuario", nombreUsuario);
+       socket.emit("Nombre usuario: ", $("#inputNombre").val());
+
+       console.log(nombreUsuario);
+       let nombre = document.querySelector(".nombre").style.display = "none";
+
+       let chat = document.querySelector(".chat").style.display = "flex";
+      }
+
+       
+     });
+ 
+      socket.on("Mensaje de chat", function (msg) {
+ 
+       $("#messages").append($("<li>").text(nombreUsuario + ": " + msg));
+ 
+       $("#chat-box").scrollTop($("#chat-box")[0].scrollHeight);
+ 
+     });
+ 
+    });
+
+
+    $(function () {
+
+     const socket = io("http://localhost:3000");
 
      $("#form").submit(function (event) {
 
@@ -118,7 +217,7 @@
 
      socket.on("Mensaje de chat", function (msg) {
 
-      $("#messages").append($("<li>").text(msg));
+      $("#messages").append($("<li>").text(localStorage.getItem("NombreUsuario") + ": " + msg));
 
       $("#chat-box").scrollTop($("#chat-box")[0].scrollHeight);
 
