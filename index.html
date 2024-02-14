@@ -192,7 +192,7 @@
  
       socket.on("Mensaje de chat", function (msg) {
  
-       $("#messages").append($("<li>").text(nombreUsuario + ": " + msg));
+        $("#messages").append($("<li>").text(localStorage.getItem("NombreUsuario") + ": " + msg));
  
        $("#chat-box").scrollTop($("#chat-box")[0].scrollHeight);
  
